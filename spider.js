@@ -3,11 +3,15 @@ var fs = require("fs");
 var cheerio = require('cheerio');
 var request = require('request');
 var i = 0;
-var url = "http://iapi.ipadown.com/api/guwen/guwen.book.show.api.php?bookvid=3311"; 
+var url = "http://iapi.ipadown.com/api/guwen/guwen.book.show.api.php?bookvid="; 
+var objArr =[];
+var isOver = false;
 console.log(url);
 
-function startRequest(x){
+function startRequest(x,index){
      console.log("running");
+   
+
     http.get(x,function(res){
         var html = '';
         res.setEncoding('utf-8');
@@ -26,16 +30,37 @@ function startRequest(x){
          //获取文章发布的时间
             Time: time,   
          //获取当前文章的url
-            link: url,
+            link:x,
             author:$('#author').text(),
          //获取供稿单位
             content: $('div.son2').text(),  
         //i是用来判断获取了多少篇文章
             i: i = i + 1,     
             };
-             console.log(newsItem);
+             //console.log(newsItem);
+             objArr[index]=newsItem;
+             if(i>=81){
+                 console.log("文件写入开始")
+                 fs.appendFile("laozi.json",JSON.stringify(objArr),function(err){
+                    if(err){
+                        console.log("文件写入错误");
+                    }else{
+                        console.log("文件写入完成");
+                    }
+                 })
+             }
 
          });
     });
 }
-startRequest(url);
+
+function getArticle(start,end){
+    var index = 0;
+    for(var i=start;i<=end;i++){
+        
+        startRequest(url+i,index);
+        index++;
+    }
+    isOver = true;
+}
+getArticle(3310,3390);
